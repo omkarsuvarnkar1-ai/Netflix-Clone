@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Netflix Clone</title>
+<style>
+:root{--bg:#141414;--surface:#181818;--card:#2f2f2f;--text:#fff;--muted:#b3b3b3;--red:#e50914;--red-d:#b20710;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;overflow-x:hidden}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+:focus-visible{outline:2px solid #fff;outline-offset:2px}
+/* nav */
+nav{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;z-index:20;display:flex;align-items:center;gap:24px;padding:14px 4%;background:linear-gradient(#000c,transparent);transition:background .3s}
+nav.solid{background:var(--bg)}
+.logo{color:var(--red);font-weight:900;font-size:clamp(22px,3vw,32px);letter-spacing:1px;margin-right:8px}
+nav ul{display:flex;gap:18px;list-style:none;margin:0;padding:0;font-size:14px}
+nav li button{color:#e5e5e5;padding:4px 0}nav li button:hover,nav li button.on{color:#fff;font-weight:700}
+.sp{flex:1}
+.search{display:flex;align-items:center;border:1px solid transparent;padding:4px 8px;gap:6px}
+.search.open{border-color:#fff;background:#000a}
+.search input{width:0;opacity:0;border:0;background:none;color:#fff;font:inherit;transition:width .3s,opacity .3s;padding:0}
+.search.open input{width:clamp(110px,22vw,220px);opacity:1;outline:0}
+.avatar{width:32px;height:32px;border-radius:4px;background:linear-gradient(135deg,#0a84ff,#5e5ce6);display:grid;place-items:center;font-size:18px}
+/* hero */
+.hero{position:relative;min-height:min(88vh,760px);display:flex;align-items:flex-end;padding:0 4% 9%;background:radial-gradient(ellipse at 75% 30%,#7a1c2e 0,transparent 55%),linear-gradient(160deg,#1b2a49,#0b0d17 70%)}
+.hero::after{content:"";position:absolute;inset:auto 0 0 0;height:40%;background:linear-gradient(transparent,var(--bg))}
+.hero .art{position:absolute;right:6%;top:18%;font-size:clamp(120px,24vw,320px);opacity:.35;filter:blur(1px)}
+.hero .txt{position:relative;z-index:1;max-width:560px}
+.badge{font-weight:700;color:var(--muted);margin:0 0 6px;font-size:14px}.badge b{color:var(--red)}
+.hero h1{font-size:clamp(40px,7vw,84px);line-height:.95;margin:0 0 14px;font-weight:900;text-shadow:0 2px 12px #0008}
+.hero p{font-size:clamp(14px,1.6vw,19px);line-height:1.4;margin:0 0 18px;text-shadow:0 1px 6px #000}
+.btns{display:flex;gap:12px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:9px 24px;border-radius:4px;font-weight:700;font-size:clamp(15px,1.5vw,19px)}
+.btn.play{background:#fff;color:#000}.btn.play:hover{background:#ffffffbf}
+.btn.info{background:#6d6d6eb3}.btn.info:hover{background:#6d6d6e66}
+/* rows */
+main{position:relative;z-index:2;margin-top:-6vw;padding-bottom:60px}
+.row{margin:0 0 3vw}.row h2{font-size:clamp(16px,1.6vw,22px);margin:0 4% 8px;font-weight:700}
+.wrap{position:relative}
+.track{display:flex;gap:6px;overflow-x:auto;scroll-behavior:smooth;scrollbar-width:none;padding:28px 4% 40px;margin:-28px 0 -40px}
+.track::-webkit-scrollbar{display:none}
+.arrow{position:absolute;top:0;bottom:0;width:4%;z-index:5;background:#000a;font-size:28px;opacity:0;transition:opacity .2s}
+.wrap:hover .arrow{opacity:1}.arrow.l{left:0}.arrow.r{right:0}
+.card{flex:0 0 clamp(130px,16vw,230px);aspect-ratio:16/9;border-radius:4px;position:relative;overflow:hidden;text-align:left;transition:transform .25s,box-shadow .25s}
+.card:hover,.card:focus-visible{transform:scale(1.18);z-index:4;box-shadow:0 10px 30px #000c}
+.card .em{position:absolute;right:8%;top:6%;font-size:clamp(34px,5vw,64px);opacity:.9}
+.card .nm{position:absolute;left:8px;bottom:6px;right:8px;font-weight:800;font-size:clamp(12px,1.4vw,18px);line-height:1.1;text-shadow:0 1px 4px #000}
+.card .tag{position:absolute;left:8px;top:6px;color:var(--red);font-weight:900;font-size:11px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(140px,18vw,240px),1fr));gap:30px 8px;padding:0 4%}
+.grid .card{flex:none;width:100%}.grid .card:hover{transform:scale(1.08)}
+.empty{padding:0 4%;color:var(--muted)}
+/* modal */
+.ov{position:fixed;inset:0;z-index:50;background:#000b;display:none;overflow-y:auto;padding:4vh 12px}
+.ov.show{display:block}
+.modal{max-width:850px;margin:0 auto;background:var(--surface);border-radius:8px;overflow:hidden;box-shadow:0 20px 60px #000;animation:pop .25s ease}
+@keyframes pop{from{transform:scale(.94);opacity:0}}
+@media(prefers-reduced-motion:reduce){.modal{animation:none}.card,.track{transition:none;scroll-behavior:auto}}
+.mhead{position:relative;aspect-ratio:16/8;display:flex;align-items:flex-end;padding:24px}
+.mhead::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 40%,var(--surface))}
+.mhead .em{position:absolute;right:8%;top:10%;font-size:clamp(80px,16vw,180px);opacity:.5}
+.mhead>div{position:relative;z-index:1}.mhead h2{margin:0 0 12px;font-size:clamp(26px,5vw,48px);font-weight:900}
+.x{position:absolute;right:12px;top:12px;z-index:2;width:36px;height:36px;border-radius:50%;background:var(--bg);font-size:20px}
+.circ{width:40px;height:40px;border-radius:50%;border:2px solid #fff8;font-size:20px;display:grid;place-items:center}.circ:hover{border-color:#fff}
+.mbody{padding:8px 24px 28px;display:grid;grid-template-columns:2fr 1fr;gap:24px}
+.meta{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px;font-size:15px}
+.meta .m{color:#46d369;font-weight:700}.meta .r{border:1px solid #fff8;padding:0 6px;font-size:13px}
+.mbody p{line-height:1.5;margin:0}.side{font-size:14px;line-height:1.7;color:var(--muted)}.side span{color:#777}
+@media(max-width:640px){nav ul{display:none}.mbody{grid-template-columns:1fr}.hero{padding-bottom:14%}}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#fff;color:#000;padding:10px 18px;border-radius:4px;font-weight:700;z-index:60;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+footer{padding:30px 4% 50px;color:#757575;font-size:13px;text-align:center}
+
+.card{aspect-ratio:2/3;flex:0 0 clamp(110px,13vw,190px);background:#2a2a2a}
+.card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.card .nm{opacity:0;transition:opacity .2s;z-index:1}.card:hover .nm,.card:focus-visible .nm,.card.noimg .nm{opacity:1}
+.card::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 60%,#000d)}
+.grid{grid-template-columns:repeat(auto-fill,minmax(clamp(120px,14vw,190px),1fr))}
+.hero{overflow:hidden;justify-content:space-between;gap:30px;background:#000}
+.hero::before{content:"";position:absolute;inset:-40px;background:var(--hb,#222) center/cover;filter:blur(28px) brightness(.45)}
+.hero .txt,.hero .poster{position:relative;z-index:1}
+.hero .poster{flex:0 0 auto;width:clamp(150px,20vw,280px);aspect-ratio:2/3;border-radius:6px;overflow:hidden;box-shadow:0 20px 50px #000;margin-bottom:2%;background:#222}
+.hero .poster img{width:100%;height:100%;object-fit:cover;display:block}
+@media(max-width:640px){.hero .poster{display:none}}
+.mhead{background:#111 center 25%/cover no-repeat}
+.mhead video{position:absolute;inset:0;width:100%;height:100%;background:#000;z-index:3}
+.cfg{max-width:560px;margin:140px auto;padding:0 20px;line-height:1.6;color:var(--muted)}.cfg h2{color:#fff}
+.ico{width:1.1em;height:1.1em;fill:currentColor}
+.circ svg{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.side a{color:#fff}
+</style>
+</head>
+<body>
+<nav id="nav">
+  <span class="logo">NETFLIX</span>
+  <ul id="menu">
+    <li><button class="on" data-f="all">Home</button></li>
+    <li><button data-f="tv">TV Shows</button></li>
+    <li><button data-f="movie">Movies</button></li>
+    <li><button data-f="list">My List</button></li>
+  </ul>
+  <span class="sp"></span>
+  <div class="search" id="search">
+    <button id="sbtn" aria-label="Search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><circle cx="10" cy="10" r="6.5"/><path d="M15 15l6 6"/></svg></button>
+    <input id="q" type="search" placeholder="Titles, genres" aria-label="Search titles">
+  </div>
+  <div class="avatar" aria-label="Profile">S</div>
+</nav>
+<header class="hero" id="hero" style="display:none">
+  <div class="txt">
+    <h1 id="ht"></h1>
+    <p id="hd"></p>
+    <div class="btns">
+      <button class="btn play" id="hplay"></button>
+      <button class="btn info" id="hinfo"></button>
+    </div>
+  </div>
+  <div class="poster" id="hposter"></div>
+</header>
+<main id="rows"><div class="cfg"><p>Loading titles...</p></div></main>
+<footer>Frontend demo built for learning. TV data and images from TVmaze (CC BY-SA). Movie data, artwork, and previews from the iTunes Search API.</footer>
+<div class="ov" id="ov" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt">
+    <div class="mhead" id="mh">
+      <button class="x" id="mx" aria-label="Close">&times;</button>
+      <div>
+        <h2 id="mt"></h2>
+        <div class="btns">
+          <button class="btn play" id="mplay"></button>
+          <button class="circ" id="mlist" aria-label="Add to My List"></button>
+        </div>
+      </div>
+    </div>
+    <div class="mbody">
+      <div><div class="meta" id="mm"></div><p id="md"></p></div>
+      <div class="side" id="ms"></div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const PLAY='<svg class="ico" viewBox="0 0 24 24"><path d="M6 3.5v17l14-8.5z"/></svg>';
+const INFO='<svg class="ico" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-6h2zm0-8h-2V7h2z"/></svg>';
+const PLUS='<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
+const CHECK='<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const strip=h=>(h||"").replace(/<[^>]*>/g,"").trim();
+const https=u=>u?u.replace(/^http:/,"https:"):null;
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let filter="all",rows=[],cur=null,list=[];
+try{list=JSON.parse(localStorage.getItem("nf-list2")||"[]")}catch(e){list=[]}
+const saveList=()=>{try{localStorage.setItem("nf-list2",JSON.stringify(list))}catch(e){}};
+const inList=d=>list.some(x=>x.key===d.key);
+/* ---------- sources ---------- */
+const tvItem=s=>({key:"tv"+s.id,kind:"tv",id:s.id,title:s.name,over:strip(s.summary),img:https(s.image&&s.image.medium),big:https(s.image&&(s.image.original||s.image.medium)),genres:s.genres||[],year:(s.premiered||"").slice(0,4),score:s.rating&&s.rating.average,site:s.officialSite||s.url,net:(s.network||s.webChannel||{}).name,status:s.status,lang:s.language});
+const art=(u,sz)=>u?https(u.replace(/\d+x\d+bb/,sz+"bb")):null;
+const movItem=m=>({key:"mv"+m.trackId,kind:"movie",title:m.trackName,over:m.longDescription||m.shortDescription||"",img:art(m.artworkUrl100,"400x600"),fallback:https(m.artworkUrl100),big:art(m.artworkUrl100,"600x900"),genres:m.primaryGenreName?[m.primaryGenreName]:[],year:(m.releaseDate||"").slice(0,4),adv:m.contentAdvisoryRating,preview:https(m.previewUrl),len:m.trackTimeMillis?Math.round(m.trackTimeMillis/60000)+" min":""});
+const getJSON=async u=>{const r=await fetch(u);if(!r.ok)throw new Error(r.status);return r.json()};
+function jsonp(url){return new Promise((res,rej)=>{const cb="cb"+Math.random().toString(36).slice(2),sc=document.createElement("script");window[cb]=j=>{res(j.results);sc.remove();delete window[cb]};sc.onerror=()=>rej(new Error("jsonp"));sc.src=url+"&callback="+cb;document.head.appendChild(sc)})}
+async function itunes(term,limit=30){const u=`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&media=movie&entity=movie&limit=${limit}`;try{return (await getJSON(u)).results}catch(e){return jsonp(u)}}
+const uniq=a=>{const m=new Map();a.forEach(d=>m.has(d.key)||m.set(d.key,d));return [...m.values()]};
+const byScore=(a,b)=>(b.score||0)-(a.score||0);
+const MOVIE_ROWS=[["Action movies","action"],["Sci-Fi movies","science fiction"],["Comedy movies","comedy"],["Thriller movies","thriller"],["Drama movies","drama"],["Animated movies","animation"]];
+async function load(){
+  const today=new Date().toISOString().slice(0,10);
+  const [web,p0,p1,p2,...mv]=await Promise.allSettled([
+    getJSON(`https://api.tvmaze.com/schedule/web?date=${today}`),
+    getJSON("https://api.tvmaze.com/shows?page=0"),getJSON("https://api.tvmaze.com/shows?page=1"),getJSON("https://api.tvmaze.com/shows?page=2"),
+    ...MOVIE_ROWS.map(r=>itunes(r[1]))]);
+  const tvRows=[],mvRows=[];
+  if(web.status==="fulfilled"){const a=uniq(web.value.map(e=>e._embedded&&e._embedded.show).filter(s=>s&&s.image).map(tvItem)).sort(byScore);if(a.length)tvRows.push({title:"Airing now on streaming",items:a.slice(0,20)})}
+  const pool=uniq([p0,p1,p2].flatMap(p=>p.status==="fulfilled"?p.value:[]).filter(s=>s.image&&s.rating&&s.rating.average).map(tvItem));
+  const g=(name,min)=>pool.filter(d=>d.genres.includes(name)&&d.score>=min).sort(byScore).slice(0,20);
+  [["Top rated TV shows",pool.filter(d=>d.score>=8.4).sort(byScore).slice(0,20)],["TV dramas",g("Drama",8)],["TV comedies",g("Comedy",7.8)],["Sci-Fi series",g("Science-Fiction",7.8)],["Crime stories",g("Crime",8)]].forEach(([title,items])=>{if(items.length>2)tvRows.push({title,items})});
+  mv.forEach((r,i)=>{if(r.status!=="fulfilled")return;const items=uniq(r.value.filter(m=>m.trackId&&m.artworkUrl100).map(movItem));if(items.length)mvRows.push({title:MOVIE_ROWS[i][0],items})});
+  const out=[];for(let i=0;i<Math.max(tvRows.length,mvRows.length);i++){if(tvRows[i])out.push(tvRows[i]);if(mvRows[i])out.push(mvRows[i])}
+  return out}
+/* ---------- render ---------- */
+function card(d){const b=document.createElement("button");b.className="card"+(d.img?"":" noimg");b.setAttribute("aria-label",d.title);
+if(d.img){const im=document.createElement("img");im.loading="lazy";im.alt="";im.src=d.img;im.onerror=()=>{if(d.fallback&&im.src!==d.fallback){im.src=d.fallback}else{im.remove();b.classList.add("noimg")}};b.appendChild(im)}
+const n=document.createElement("span");n.className="nm";n.textContent=d.title;b.appendChild(n);b.onclick=()=>openM(d);return b}
+function rowEl(title,items){const r=document.createElement("section");r.className="row";r.innerHTML=`<h2>${esc(title)}</h2><div class="wrap"><button class="arrow l" aria-label="Scroll left">&lsaquo;</button><div class="track"></div><button class="arrow r" aria-label="Scroll right">&rsaquo;</button></div>`;
+const t=r.querySelector(".track");items.forEach(d=>t.appendChild(card(d)));
+r.querySelector(".l").onclick=()=>t.scrollBy({left:-t.clientWidth*.85});r.querySelector(".r").onclick=()=>t.scrollBy({left:t.clientWidth*.85});return r}
+function gridEl(title,items,empty){const s=document.createElement("section");s.className="row";const h=document.createElement("h2");h.textContent=title;s.appendChild(h);
+if(items.length){const g=document.createElement("div");g.className="grid";items.forEach(d=>g.appendChild(card(d)));s.appendChild(g)}else{const p=document.createElement("p");p.className="empty";p.textContent=empty;s.appendChild(p)}return s}
+const all=()=>uniq(rows.flatMap(r=>r.items));
+function render(){const m=$("#rows");m.innerHTML="";
+if(filter==="list"){m.appendChild(gridEl("My List",list,"Your list is empty. Open any title and select + to save it here."));return}
+if(filter==="all"&&list.length)m.appendChild(rowEl("My List",list));
+const rs=rows.map(r=>({title:r.title,items:r.items.filter(d=>filter==="all"||d.kind===filter)})).filter(r=>r.items.length);
+if(!rs.length){m.innerHTML='<div class="cfg"><h2>No titles loaded</h2><p>Check your internet connection and reload the page.</p></div>';return}
+rs.forEach(r=>m.appendChild(rowEl(r.title,r.items)))}
+/* ---------- modal ---------- */
+function stopVideo(){const v=$("#mh video");if(v){v.pause();v.remove()}}
+async function openM(d){cur=d;stopVideo();
+$("#mh").style.backgroundImage=d.big?`url(${d.big})`:"";
+$("#mt").textContent=d.title;$("#md").textContent=d.over||"No description available.";
+$("#mm").innerHTML=[d.score?`<span class="m">${Math.round(d.score*10)}% Match</span>`:"",d.year?`<span>${esc(d.year)}</span>`:"",d.adv?`<span class="r">${esc(d.adv)}</span>`:"",d.len?`<span>${esc(d.len)}</span>`:"",`<span>${d.kind==="tv"?"TV show":"Movie"}</span>`].join("");
+$("#ms").innerHTML=`<div><span>Genres:</span> ${esc(d.genres.join(", ")||"n/a")}</div>`+(d.net?`<div><span>Network:</span> ${esc(d.net)}</div>`:"")+(d.status?`<div><span>Status:</span> ${esc(d.status)}</div>`:"");
+$("#mplay").innerHTML=PLAY+(d.kind==="movie"?"Play preview":"Official site");
+syncBtn();$("#ov").classList.add("show");$("#ov").setAttribute("aria-hidden","false");document.body.style.overflow="hidden";$("#mx").focus();
+if(d.kind==="tv"&&d.id){try{const c=await getJSON(`https://api.tvmaze.com/shows/${d.id}/cast`);if(cur===d&&c.length)$("#ms").insertAdjacentHTML("afterbegin",`<div><span>Cast:</span> ${esc(c.slice(0,4).map(x=>x.person.name).join(", "))}</div>`)}catch(e){}}}
+function act(d){if(!d)return;
+if(d.kind==="movie"){if(!d.preview){toast("No preview available for this title");return}
+stopVideo();const v=document.createElement("video");v.src=d.preview;v.controls=true;v.autoplay=true;v.playsInline=true;$("#mh").appendChild(v)}
+else if(d.site){window.open(d.site,"_blank","noopener");toast("Opening the official page")}else toast("No official page listed")}
+function closeM(){$("#ov").classList.remove("show");$("#ov").setAttribute("aria-hidden","true");stopVideo();document.body.style.overflow=""}
+function syncBtn(){const on=cur&&inList(cur);$("#mlist").innerHTML=on?CHECK:PLUS;$("#mlist").setAttribute("aria-label",on?"Remove from My List":"Add to My List")}
+function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("show"),2000)}
+$("#mlist").onclick=()=>{if(inList(cur)){list=list.filter(x=>x.key!==cur.key);toast("Removed from My List")}else{list.push(cur);toast("Added to My List")}saveList();syncBtn();if(!$("#q").value.trim())render()};
+$("#mx").onclick=closeM;$("#ov").onclick=e=>{if(e.target.id==="ov")closeM()};
+addEventListener("keydown",e=>{if(e.key==="Escape")closeM()});
+$("#mplay").onclick=()=>act(cur);
+/* ---------- hero, nav, search ---------- */
+function setHero(d){$("#hero").style.setProperty("--hb",`url(${d.big})`);$("#hposter").innerHTML="";const im=document.createElement("img");im.alt=d.title;im.src=d.big;$("#hposter").appendChild(im);
+$("#ht").textContent=d.title;$("#hd").textContent=d.over.length>230?d.over.slice(0,227)+"...":d.over;
+$("#hplay").innerHTML=PLAY+(d.kind==="movie"?"Play preview":"Official site");$("#hinfo").innerHTML=INFO+"More info";
+$("#hplay").onclick=()=>{if(d.kind==="movie"){openM(d).then(()=>act(d))}else act(d)};$("#hinfo").onclick=()=>openM(d)}
+const showHero=on=>{$("#hero").style.display=on?"":"none";$("main").style.marginTop=on?"":"110px"};
+document.querySelectorAll("#menu button").forEach(b=>b.onclick=()=>{filter=b.dataset.f;$("#q").value="";document.querySelectorAll("#menu button").forEach(x=>x.classList.toggle("on",x===b));showHero(filter==="all"&&heroOk);render();scrollTo(0,0)});
+$("#sbtn").onclick=()=>{const s=$("#search");s.classList.toggle("open");if(s.classList.contains("open"))$("#q").focus();else{$("#q").value="";showHero(filter==="all"&&heroOk);render()}};
+let timer,seq=0;
+$("#q").oninput=e=>{const q=e.target.value.trim();clearTimeout(timer);
+if(!q){showHero(filter==="all"&&heroOk);render();return}
+showHero(false);const my=++seq;
+timer=setTimeout(async()=>{const m=$("#rows");m.innerHTML='<div class="cfg"><p>Searching...</p></div>';
+const [tv,mv]=await Promise.allSettled([getJSON(`https://api.tvmaze.com/search/shows?q=${encodeURIComponent(q)}`),itunes(q,20)]);
+if(my!==seq)return;
+const res=[...(tv.status==="fulfilled"?tv.value.map(x=>tvItem(x.show)).filter(d=>d.img):[]),...(mv.status==="fulfilled"?mv.value.filter(x=>x.trackId&&x.artworkUrl100).map(movItem):[])].filter(d=>filter==="all"||filter==="list"||d.kind===filter);
+m.innerHTML="";m.appendChild(gridEl(`Results for "${q}"`,uniq(res),"No titles match your search. Try a different title or genre."))},400)};
+addEventListener("scroll",()=>$("#nav").classList.toggle("solid",scrollY>40),{passive:true});
+let heroOk=false;
+(async()=>{try{rows=await load();const h=rows.flatMap(r=>r.items).find(d=>d.kind==="tv"&&d.big);if(h){setHero(h);heroOk=true}showHero(heroOk);render()}
+catch(e){$("#rows").innerHTML='<div class="cfg"><h2>Could not load titles</h2><p>Check your internet connection and reload the page.</p></div>'}})();
+</script>
+</body>
+</html>
